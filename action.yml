@@ -22,6 +22,8 @@ inputs:
   disable-nix-access-token: # 'true' or 'false'
     description: 'Disable configuration of nix access-tokens with the GitHub token used in the workflow'
     default: 'false'
+  nix-access-token: # a github.com access token
+    description: 'Specify an access token to be used as nix access-token. Defaults to GITHUB_TOKEN"
   skip-nix-installation: # 'true' or 'false'
     description: 'Skip the installation of nix'
     default: 'false'
@@ -121,9 +123,11 @@ runs:
     - name: Configure nix access-tokens
       if: inputs.disable-nix-access-token == 'false'
       shell: bash
+      env:
+        NIX_ACCESS_TOKEN: ${{ inputs.nix-access-token || github.token }}
       run: |
         mkdir -p ~/.config/nix
-        echo "access-tokens = github.com=${{ github.token }}" >> ~/.config/nix/nix.conf
+        echo "access-tokens = github.com=${NIX_ACCESS_TOKEN}" >> ~/.config/nix/nix.conf
 
     - name: Install nix
       if: inputs.skip-nix-installation == 'false'
